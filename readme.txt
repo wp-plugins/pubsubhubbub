@@ -16,9 +16,8 @@ Parties (servers) speaking the PubSubHubbub protocol can get near-instant notifi
 
 This plugin:
    
- 	* Notifies your specified hub each time you publish a new post
-
-    * Shares your specified hub by adding <link rel="hub" ...> to your template header and ATOM XML feed
+* Notifies your specified hub each time you publish a new post
+* Shares your specified hub by adding <link rel="hub" ...> to your template header and ATOM XML feed
 
 The PubSubHubbub protocol is decentralized and free. No company is at the center of this controlling it. Anybody can run a hub, or anybody can ping (publish) or subscribe using open hubs.  If no custom hub is specified, this plugin will use the demonstration hub that is running on Google App Engine.  
 
