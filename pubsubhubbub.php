@@ -2,7 +2,7 @@
 /*
 Plugin Name: PubSubHubbub
 Plugin URI: http://code.google.com/p/pubsubhubbub/
-Description: A better way to tell the world when your blog is updated.  Set custom endpoints for your chosen hub on the <a href="./options-general.php?page=pubsubhubbub/pubsubhubbub">PubSubHubbub settings</a> page 
+Description: A better way to tell the world when your blog is updated.  Set a custom hub on the <a href="./options-general.php?page=pubsubhubbub/pubsubhubbub">PubSubHubbub settings page</a> 
 Version: 1.0
 Author: Josh Fraser
 Author Email: josh@eventvue.com
@@ -16,7 +16,7 @@ function publish_to_hub($post_id)  {
     
     $atom_url = get_bloginfo('atom_url');
     // get the address of the publish endpoint on the hub
-    $hub_url = get_pubsub_endpoint("publish");
+    $hub_url = get_pubsub_endpoint();
     $p = new Publisher($hub_url);
     // need better error handling
     if (!$p->publish_update($atom_url, "http_post_wp")) {
@@ -26,7 +26,7 @@ function publish_to_hub($post_id)  {
 }
 
 function add_link_tag() {    
-    $sub_url = get_pubsub_endpoint("subscribe");
+    $sub_url = get_pubsub_endpoint();
     echo '<link rel="hub" href="'.$sub_url.'" />';
 }
 
@@ -37,17 +37,12 @@ function add_plugin_menu() {
 
 // get the endpoints from the wordpress options table
 // valid parameters are "publish" or "subscribe"
-function get_pubsub_endpoint($sub_or_pub) {
-    $endpoint = get_option('pubsub_'.$sub_or_pub.'_endpoint');
+function get_pubsub_endpoint() {
+    $endpoint = get_option('pubsub_endpoint');
 
     // if no values have been set, revert to the defaults (pubsubhubbub on app engine)
     if (!$endpoint) {
-        if ($sub_or_pub == "publish")
-            $endpoint = "http://pubsubhubbub.appspot.com/publish";
-        else if ($sub_or_pub == "subscribe")
-            $endpoint = "http://pubsubhubbub.appspot.com/subscribe";
-        else
-            return false; // not sure of the best way to add error handling within wordpress
+        $endpoint = "http://pubsubhubbub.appspot.com";
     }
     return $endpoint;
 }
@@ -55,35 +50,29 @@ function get_pubsub_endpoint($sub_or_pub) {
 // write the content for our settings page that allows you to define your endpoints
 function add_settings_page() { ?>
     <div class="wrap">
-    <h2>Define custom endpoints</h2>
+    <h2>Define a custom endpoint</h2>
     
     <form method="post" action="options.php">
     <?php wp_nonce_field('update-options'); ?>
     
     <?php
     
-    // load the existing values from the wordpress options table
-    $publish_endpoint = get_pubsub_endpoint("publish");
-    $subscribe_endpoint = get_pubsub_endpoint("subscribe");
+    // load the existing pubsub endpoint value from the wordpress options table
+    $pubsub_endpoint = get_pubsub_endpoint();
     
     ?>
 
     <table class="form-table">
 
     <tr valign="top">
-    <th scope="row">Publish endpoint</th>
-    <td><input type="text" name="pubsub_publish_endpoint" value="<?php echo $publish_endpoint; ?>" size="50" /></td>
-    </tr>
-
-    <tr valign="top">
-    <th scope="row">Subscribe endpoint</th>
-    <td><input type="text" name="pubsub_subscribe_endpoint" value="<?php echo $subscribe_endpoint; ?>" size="50" /></td>
+    <th scope="row">Endpoint URL:</th>
+    <td><input type="text" name="pubsub_endpoint" value="<?php echo $pubsub_endpoint; ?>" size="50" /></td>
     </tr>
 
     </table>
 
     <input type="hidden" name="action" value="update" />
-    <input type="hidden" name="page_options" value="pubsub_publish_endpoint,pubsub_subscribe_endpoint" />
+    <input type="hidden" name="page_options" value="pubsub_endpoint" />
 
     <p class="submit">
     <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
