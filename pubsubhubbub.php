@@ -3,7 +3,7 @@
 Plugin Name: PubSubHubbub
 Plugin URI: http://code.google.com/p/pubsubhubbub/
 Description: A better way to tell the world when your blog is updated.  Set a custom hub on the <a href="./options-general.php?page=pubsubhubbub/pubsubhubbub">PubSubHubbub settings page</a> 
-Version: 1.0
+Version: 1.1
 Author: Josh Fraser
 Author Email: josh@eventvue.com
 Author URI: http://www.joshfraser.com
@@ -25,9 +25,32 @@ function publish_to_hub($post_id)  {
     return $post_id;
 }
 
-function add_link_tag() {    
+// announce which hub server you are using (Atom)
+function add_atom_link_tag() {    
     $sub_url = get_pubsub_endpoint();
     echo '<link rel="hub" href="'.$sub_url.'" />';
+}
+
+// announce which hub server you are using (RSS & RSS2)
+function add_rss_link_tag() {    
+    $sub_url = get_pubsub_endpoint();
+    echo '<atom:link rel="hub" href="'.$sub_url.'"/>';
+}
+
+// hack to add the atom definition to the 0.92 RSS feed
+// start capturing the feed output.  this is run at priority 9 (before output)
+function start_rss_link_tag() {    
+    ob_start();
+}
+
+// this is run at priority 11 (after output)
+// add in the xmlns atom definition link
+function end_rss_link_tag() {    
+    $feed = ob_get_clean();
+    $pattern = '/<rss version="(.+)">/i';
+    $replacement = '<rss version="$1" xmlns:atom="http://www.w3.org/2005/Atom">';
+    // change <rss version="X.XX"> to <rss version="X.XX" xmlns:atom="http://www.w3.org/2005/Atom">
+    echo preg_replace($pattern, $replacement, $feed);
 }
 
 // add a link to our settings page in the WP menu
@@ -127,10 +150,18 @@ function http_post_wp($url, $post_vars) {
 add_action('publish_post', 'publish_to_hub');
 // add the link to our settings page in the WP menu structure
 add_action('admin_menu', 'add_plugin_menu');
-// add the link tag that points to the hub in the header of our template & in our atom feed
-add_action('atom_head', 'add_link_tag');
-// not sure if we want to include this long-term or not.  it's important for us to have for now since so 
-// many people use feedburner and the feedburner-forwarding plugin for wordpress
-add_action('wp_head', 'add_link_tag');
+
+// add the link tag that points to the hub in the header of our template...
+
+// in our atom feed
+add_action('atom_head', 'add_atom_link_tag');
+// to our RSS 1 feed (requires a bit of a hack)
+add_action('do_feed_rss', 'start_rss_link_tag', 9); // run before output
+add_action('do_feed_rss', 'end_rss_link_tag', 11); // run after output
+add_action('rss_head', 'add_rss_link_tag');
+// to our RSS 2 feed
+add_action('rss2_head', 'add_rss_link_tag');
+// to our main HTML header -- not sure if we want to include this long-term or not.
+add_action('wp_head', 'add_atom_link_tag');
 
 ?>
