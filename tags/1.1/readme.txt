@@ -10,14 +10,15 @@ A better way to tell the world when your blog is updated.
 
 == Description ==
 
-This plugin that implements [the PubSubHubbub protocol](http://pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.1.html "the PubSubHubbub protocol").  [PubSubHubbub](http://code.google.com/p/pubsubhubbub/ "PubSubHubbub") is a simple, open, server-to-server web-hook-based pubsub (publish/subscribe) protocol as a simple extension to Atom. 
+This plugin that implements [the PubSubHubbub protocol](http://pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.1.html "the PubSubHubbub protocol").  [PubSubHubbub](http://code.google.com/p/pubsubhubbub/ "PubSubHubbub") is a simple, open, server-to-server web-hook-based pubsub (publish/subscribe) protocol as a simple extension to Atom (and now RSS!). 
 
-Parties (servers) speaking the PubSubHubbub protocol can get near-instant notifications (via webhook callbacks) when a topic (Atom URL) they're interested in is updated.
+Parties (servers) speaking the PubSubHubbub protocol can get near-instant notifications (via webhook callbacks) when a topic (feed URL) they're interested in is updated.
 
 This plugin:
    
 * Notifies your specified hub each time you publish a new post
-* Shares your specified hub by adding `<link rel="hub" ...>` to your template header and ATOM XML feed
+* Announces your specified hub by adding `<link rel="hub" ...>` to your template header and ATOM feed
+* Adds `<atom:link rel="hub" ...>` to your RSS feeds along with the necessary XMLNS declaration for RSS 0.92
 
 The PubSubHubbub protocol is decentralized and free. No company is at the center of this controlling it. Anybody can run a hub, or anybody can ping (publish) or subscribe using open hubs.  If no custom hub is specified, this plugin will use the demonstration hub that is running on Google App Engine.  
 
