@@ -14,30 +14,39 @@ include("publisher.php");
 // function that is called whenever a new post is published
 function publish_to_hub($post_id)  {
     
-    $atom_url = get_bloginfo('atom_url');
+    // we want to notify the hub for every feed
+    $feed_urls = array();
+    $feed_urls[] = get_bloginfo('atom_url');
+    $feed_urls[] = get_bloginfo('rss_url');
+    $feed_urls[] = get_bloginfo('rdf_url');
+    $feed_urls[] = get_bloginfo('rss2_url');
+    // remove dups (ie. they all point to feedburner)
+    $feed_urls = array_unique($feed_urls);
     // get the address of the publish endpoint on the hub
     $hub_url = get_pubsub_endpoint();
     $p = new Publisher($hub_url);
     // need better error handling
-    if (!$p->publish_update($atom_url, "http_post_wp")) {
+    if (!$p->publish_update($feed_urls, "http_post_wp")) {
         print_r($p->last_response());
-    }
+    }    
     return $post_id;
 }
 
-// announce which hub server you are using (Atom)
 function add_atom_link_tag() {    
     $sub_url = get_pubsub_endpoint();
     echo '<link rel="hub" href="'.$sub_url.'" />';
 }
 
-// announce which hub server you are using (RSS & RSS2)
 function add_rss_link_tag() {    
     $sub_url = get_pubsub_endpoint();
     echo '<atom:link rel="hub" href="'.$sub_url.'"/>';
 }
 
-// hack to add the atom definition to the 0.92 RSS feed
+function add_rdf_ns_link() {
+    echo 'xmlns:atom="http://www.w3.org/2005/Atom"';
+}
+
+// hack to add the atom definition to the RSS feed
 // start capturing the feed output.  this is run at priority 9 (before output)
 function start_rss_link_tag() {    
     ob_start();
@@ -153,12 +162,15 @@ add_action('admin_menu', 'add_plugin_menu');
 
 // add the link tag that points to the hub in the header of our template...
 
-// in our atom feed
+// to our atom feed
 add_action('atom_head', 'add_atom_link_tag');
-// to our RSS 1 feed (requires a bit of a hack)
+// to our RSS 0.92 feed (requires a bit of a hack to include the ATOM namespace definition)
 add_action('do_feed_rss', 'start_rss_link_tag', 9); // run before output
 add_action('do_feed_rss', 'end_rss_link_tag', 11); // run after output
 add_action('rss_head', 'add_rss_link_tag');
+// to our RDF / RSS 1 feed
+add_action('rdf_ns', 'add_rdf_ns_link');
+add_action('rdf_header', 'add_rss_link_tag');
 // to our RSS 2 feed
 add_action('rss2_head', 'add_rss_link_tag');
 // to our main HTML header -- not sure if we want to include this long-term or not.
