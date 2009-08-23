@@ -2,8 +2,8 @@
 /*
 Plugin Name: PubSubHubbub
 Plugin URI: http://code.google.com/p/pubsubhubbub/
-Description: A better way to tell the world when your blog is updated. 
-Version: 1.2
+Description: A better way to tell the world when your blog is updated.  Set a custom hub on the <a href="./options-general.php?page=pubsubhubbub/pubsubhubbub">PubSubHubbub settings page</a> 
+Version: 1.1
 Author: Josh Fraser
 Author Email: josh@eventvue.com
 Author URI: http://www.joshfraser.com
@@ -22,31 +22,24 @@ function publish_to_hub($post_id)  {
     $feed_urls[] = get_bloginfo('rss2_url');
     // remove dups (ie. they all point to feedburner)
     $feed_urls = array_unique($feed_urls);
-    // get the list of hubs
-    $hub_urls = get_pubsub_endpoints();
-    // loop through each hub
-    foreach ($hub_urls as $hub_url) {
-        $p = new Publisher($hub_url);
-        // publish the update to each hub
-        if (!$p->publish_update($feed_urls, "http_post_wp")) {
-            // TODO: add better error handling here
-        }    
-    }
+    // get the address of the publish endpoint on the hub
+    $hub_url = get_pubsub_endpoint();
+    $p = new Publisher($hub_url);
+    // need better error handling
+    if (!$p->publish_update($feed_urls, "http_post_wp")) {
+        print_r($p->last_response());
+    }    
     return $post_id;
 }
 
 function add_atom_link_tag() {    
-    $hub_urls = get_pubsub_endpoints();
-    foreach ($hub_urls as $hub_url) {
-        echo '<link rel="hub" href="'.$hub_url.'" />';
-    }
+    $sub_url = get_pubsub_endpoint();
+    echo '<link rel="hub" href="'.$sub_url.'" />';
 }
 
 function add_rss_link_tag() {    
-    $hub_urls = get_pubsub_endpoints();
-    foreach ($hub_urls as $hub_url) {
-        echo '<atom:link rel="hub" href="'.$hub_url.'"/>';
-    }
+    $sub_url = get_pubsub_endpoint();
+    echo '<atom:link rel="hub" href="'.$sub_url.'"/>';
 }
 
 function add_rdf_ns_link() {
@@ -76,54 +69,42 @@ function add_plugin_menu() {
 
 // get the endpoints from the wordpress options table
 // valid parameters are "publish" or "subscribe"
-function get_pubsub_endpoints() {
-    $endpoints = get_option('pubsub_endpoints');
-    $hub_urls = explode("\n",$endpoints);
+function get_pubsub_endpoint() {
+    $endpoint = get_option('pubsub_endpoint');
 
-    // if no values have been set, revert to the defaults (pubsubhubbub on app engine & superfeedr)
-    if (!$endpoints) {
-        $hub_urls[] = "http://pubsubhubbub.appspot.com";
-        $hub_urls[] = "http://superfeedr.com/hubbub";
+    // if no values have been set, revert to the defaults (pubsubhubbub on app engine)
+    if (!$endpoint) {
+        $endpoint = "http://pubsubhubbub.appspot.com";
     }
-    
-    // clean out any blank values
-    foreach ($hub_urls as $key => $value) {
-        if (is_null($value) || $value=="") {
-            unset($hub_urls[$key]);
-        } else {
-            $hub_urls[$key] = trim($hub_urls[$key]);
-        }
-    }
-    
-    return $hub_urls;
+    return $endpoint;
 }
 
 // write the content for our settings page that allows you to define your endpoints
 function add_settings_page() { ?>
     <div class="wrap">
-    <h2>Define custom hubs</h2>
+    <h2>Define a custom endpoint</h2>
     
     <form method="post" action="options.php">
     <?php wp_nonce_field('update-options'); ?>
     
     <?php
     
-    // load the existing pubsub endpoint list from the wordpress options table
-    $pubsub_endpoints = trim(implode("\n",get_pubsub_endpoints()),"\n");
+    // load the existing pubsub endpoint value from the wordpress options table
+    $pubsub_endpoint = get_pubsub_endpoint();
     
     ?>
 
     <table class="form-table">
 
     <tr valign="top">
-    <th scope="row">Hubs (one per line)</th>
-    <td><textarea name="pubsub_endpoints" style='width:600px;height:100px'><?php echo $pubsub_endpoints; ?></textarea></td>
+    <th scope="row">Endpoint URL:</th>
+    <td><input type="text" name="pubsub_endpoint" value="<?php echo $pubsub_endpoint; ?>" size="50" /></td>
     </tr>
 
     </table>
 
     <input type="hidden" name="action" value="update" />
-    <input type="hidden" name="page_options" value="pubsub_endpoints" />
+    <input type="hidden" name="page_options" value="pubsub_endpoint" />
 
     <p class="submit">
     <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
@@ -132,15 +113,12 @@ function add_settings_page() { ?>
     </form>
     
     <br /><br />
-    <div style='background-color:#FFFEEB;border:1px solid #CCCCCC;padding:12px'>
-        <strong>Thanks for using PubSubHubbub!</strong><br />
-        Visit these links to learn more about PubSubHubbub and the author of this plugin:<br />
-        <ul>
-            <li><a href='http://www.onlineaspect.com'>Subscribe to Online Aspect</a></li>
-            <li><a href='http://www.twitter.com/joshfraser'>Follow Josh Fraser on twitter</a></li>
-            <li><a href='http://code.google.com/p/pubsubhubbub/'>Learn more about the PubSubHubbub protocol</a></li>
-        </ul>
-    </div>
+    Thanks for using PubSubHubbub.  Learn more about PubSubHubbub and author of this plugin:
+    <ul>
+        <li><a href='http://www.onlineaspect.com'>Subscribe to Online Aspect</a></li>
+        <li><a href='http://www.twitter.com/joshfraser'>Follow Josh Fraser on twitter</a></li>
+        <li><a href='http://code.google.com/p/pubsubhubbub/'>Learn more about the PubSubHubbub protocol</a></li>
+    </ul>
     
     </div>
 
@@ -155,7 +133,7 @@ if (!function_exists('get_snoopy')) {
 	}
 }
 
-// over-ride the default curl http function to post to the hub endpoints
+// over-ride the default curl http function to post to the hub endpoint
 function http_post_wp($url, $post_vars) {
     
     // turn the query string into an array for snoopy
@@ -176,14 +154,6 @@ function http_post_wp($url, $post_vars) {
     return false;
 }
 
-// add a settings link next to deactive / edit
-function add_settings_link( $links, $file ) {
- 	if( $file == 'pubsubhubbub/pubsubhubbub.php' && function_exists( "admin_url" ) ) {
-		$settings_link = '<a href="' . admin_url( 'options-general.php?page=pubsubhubbub/pubsubhubbub' ) . '">' . __('Settings') . '</a>';
-		array_unshift( $links, $settings_link ); // before other links
-	}
-	return $links;
-}
 
 // attach the handler that gets called every time you publish a post
 add_action('publish_post', 'publish_to_hub');
@@ -205,7 +175,5 @@ add_action('rdf_header', 'add_rss_link_tag');
 add_action('rss2_head', 'add_rss_link_tag');
 // to our main HTML header -- not sure if we want to include this long-term or not.
 add_action('wp_head', 'add_atom_link_tag');
-
-add_filter('plugin_action_links', 'add_settings_link', 10, 2);
 
 ?>
