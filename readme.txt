@@ -20,10 +20,11 @@ This plugin:
 * Adds `<atom:link rel="hub" ...>` to your RSS feeds along with the necessary XMLNS declaration for RSS 0.92/1.0
 
 By default this plugin will ping the following hubs:
+
 * [Demo hub on Google App Engine](http://pubsubhubbub.appspot.com "Demo hub on Google App Engine")
 * [SuperFeedr](http://superfeedr.com/hubbub "SuperFeedr")
 
-Please contact me if you operate a hub that you would like to be included.
+Please contact me if you operate a hub that you would like to be included as a default option.
 
 == Installation ==
 
