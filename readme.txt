@@ -32,6 +32,8 @@ Please contact me if you operate a hub that you would like to be included as a d
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Select custom hubs under your PubSubHubbub Settings (optional)
 
+Note: PHP 5.0 or better is required.
+
 == Frequently Asked Questions ==
 
 = Where can I learn more about the PubSubHubbub protocol? =
