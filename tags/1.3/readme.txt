@@ -14,8 +14,8 @@ This [PubSubHubbub](http://code.google.com/p/pubsubhubbub/ "PubSubHubbub") plugi
 
 This plugin:
  
-* Now supports multi-user installations!
-* Supports multiple hubs!   
+* Supports multi-user installations (NEW!)
+* Supports multiple hubs
 * Supports all of the feed formats used by WordPress, not just ATOM and RSS2
 * Announces which hubs you are using by adding `<link rel="hub" ...>` declarations to your template header and ATOM feed
 * Adds `<atom:link rel="hub" ...>` to your RSS feeds along with the necessary XMLNS declaration for RSS 0.92/1.0
@@ -37,17 +37,21 @@ Note: PHP 5.0 or better is required.
 
 == Frequently Asked Questions ==
 
-= Where can I learn more about the PubSubHubbub protocol? =
+= Where can I learn more about the PubSubHubbub (PuSH) protocol? =
 
 You can visit [PubSubHubbb on Google Code](http://code.google.com/p/pubsubhubbub/ "PubSubHubbb on Google Code")
 
 = Where can I learn more about the author of this plugin? =
 
-You can learn more about [Josh Fraser](http://www.joshfraser.com "Josh Fraser") at [Online Aspect](http://www.onlineaspect.com "Online Aspect")
+You can learn more about [Josh Fraser](http://www.joshfraser.com "Josh Fraser") at [Online Aspect](http://www.onlineaspect.com "Online Aspect") or follow [@joshfraser on twitter](http://www.twitter.com/joshfraser "Josh Fraser on Twitter")
 
 = Does this plugin work with MU? =
 
 Multi-user support was added in version 1.3
+
+= Does this plugin work with PHP 4.x? =
+
+Nope.  Sorry.  For now you must have PHP 5.0 or better.
 
 == Screenshots ==
 
