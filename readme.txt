@@ -53,7 +53,7 @@ Multi-user support was added in version 1.3
 
 Nope.  Sorry.  For now you must have PHP 5.0 or better.
 
-= I published a blog post but it didn't show up right away in Google Reader, is the plugin broken? =
+= Blog posts don't show up right away in Google Reader. Is it broken? =
 
 Google Reader currently supports PuSH for shared items, but not general subscriptions.  Hopefully they will add that functionality soon (I hear they're working on it).  In the meantime, you can check that everything is working correctly by publishing a post and then checking the status at http://pubsubhubbub.appspot.com/topic-details?hub.url=URL-OF-YOUR-FEED
 
