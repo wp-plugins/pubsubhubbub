@@ -43,7 +43,7 @@ You can visit [PubSubHubbb on Google Code](http://code.google.com/p/pubsubhubbub
 
 = Where can I learn more about the author of this plugin? =
 
-You can learn more about [Josh Fraser](http://www.joshfraser.com "Josh Fraser") at [Online Aspect](http://www.onlineaspect.com "Online Aspect") or follow [@joshfraser on twitter](http://www.twitter.com/joshfraser "Josh Fraser on Twitter")
+You can learn more about Josh Fraser at [Online Aspect](http://www.onlineaspect.com "Online Aspect") or follow [@joshfraser on twitter](http://www.twitter.com/joshfraser "Josh Fraser on Twitter")
 
 = Does this plugin work with MU? =
 
@@ -52,6 +52,14 @@ Multi-user support was added in version 1.3
 = Does this plugin work with PHP 4.x? =
 
 Nope.  Sorry.  For now you must have PHP 5.0 or better.
+
+= I published a blog post but it didn't show up right away in Google Reader, is the plugin broken? =
+
+Google Reader currently supports PuSH for shared items, but not general subscriptions.  Hopefully they will add that functionality soon (I hear they're working on it).  In the meantime, you can check that everything is working correctly by publishing a post and then checking the status at http://pubsubhubbub.appspot.com/topic-details?hub.url=URL-OF-YOUR-FEED
+
+= Got another question that isn't covered here? =
+
+Visit [my contact page](http://onlineaspect.com/contact/ "Contact Josh Fraser") to see various ways to get in touch with me.
 
 == Screenshots ==
 
