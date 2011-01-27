@@ -3,7 +3,7 @@
 Plugin Name: PubSubHubbub
 Plugin URI: http://code.google.com/p/pubsubhubbub/
 Description: A better way to tell the world when your blog is updated. 
-Version: 1.3
+Version: 1.4
 Author: Josh Fraser
 Author Email: josh@eventvue.com
 Author URI: http://www.joshfraser.com
@@ -12,59 +12,56 @@ Author URI: http://www.joshfraser.com
 include("publisher.php");
 
 // function that is called whenever a new post is published
-// the ability for other plugins to hook into the PuSH code was added by Stephen Paul Weber (http://singpolyma.net)
-function publish_to_hub($post_id,$feed_urls=NULL)  {
+function pshb_publish_to_hub($post_id)  {
     
     // we want to notify the hub for every feed
-    if(!$feed_urls) {
-        $feed_urls = array();
-        $feed_urls[] = get_bloginfo('atom_url');
-        $feed_urls[] = get_bloginfo('rss_url');
-        $feed_urls[] = get_bloginfo('rdf_url');
-        $feed_urls[] = get_bloginfo('rss2_url');
-    }
+    $feed_urls = array();
+    $feed_urls[] = get_bloginfo('atom_url');
+    $feed_urls[] = get_bloginfo('rss_url');
+    $feed_urls[] = get_bloginfo('rdf_url');
+    $feed_urls[] = get_bloginfo('rss2_url');
     // remove dups (ie. they all point to feedburner)
     $feed_urls = array_unique($feed_urls);
     // get the list of hubs
-    $hub_urls = get_pubsub_endpoints();
+    $hub_urls = pshb_get_pubsub_endpoints();
     // loop through each hub
     foreach ($hub_urls as $hub_url) {
         $p = new Publisher($hub_url);
         // publish the update to each hub
-        if (!$p->publish_update($feed_urls, "http_post_wp")) {
+        if (!$p->publish_update($feed_urls)) {
             // TODO: add better error handling here
         }    
     }
     return $post_id;
 }
 
-function add_atom_link_tag() {    
-    $hub_urls = get_pubsub_endpoints();
+function pshb_add_atom_link_tag() {    
+    $hub_urls = pshb_get_pubsub_endpoints();
     foreach ($hub_urls as $hub_url) {
         echo '<link rel="hub" href="'.$hub_url.'" />';
     }
 }
 
-function add_rss_link_tag() {    
-    $hub_urls = get_pubsub_endpoints();
+function pshb_add_rss_link_tag() {    
+    $hub_urls = pshb_get_pubsub_endpoints();
     foreach ($hub_urls as $hub_url) {
         echo '<atom:link rel="hub" href="'.$hub_url.'"/>';
     }
 }
 
-function add_rdf_ns_link() {
+function pshb_add_rdf_ns_link() {
     echo 'xmlns:atom="http://www.w3.org/2005/Atom"';
 }
 
 // hack to add the atom definition to the RSS feed
 // start capturing the feed output.  this is run at priority 9 (before output)
-function start_rss_link_tag() {    
+function pshb_start_rss_link_tag() {    
     ob_start();
 }
 
 // this is run at priority 11 (after output)
 // add in the xmlns atom definition link
-function end_rss_link_tag() {    
+function pshb_end_rss_link_tag() {    
     $feed = ob_get_clean();
     $pattern = '/<rss version="(.+)">/i';
     $replacement = '<rss version="$1" xmlns:atom="http://www.w3.org/2005/Atom">';
@@ -73,13 +70,13 @@ function end_rss_link_tag() {
 }
 
 // add a link to our settings page in the WP menu
-function add_plugin_menu() {
-    add_options_page('PubSubHubbub Settings', 'PubSubHubbub', 8, __FILE__, 'add_settings_page');
+function pshb_add_plugin_menu() {
+    add_options_page('PubSubHubbub Settings', 'PubSubHubbub', 8, __FILE__, 'pshb_add_settings_page');
 }
 
 // get the endpoints from the wordpress options table
 // valid parameters are "publish" or "subscribe"
-function get_pubsub_endpoints() {
+function pshb_get_pubsub_endpoints() {
     $endpoints = get_option('pubsub_endpoints');
     $hub_urls = explode("\n",$endpoints);
 
@@ -102,7 +99,7 @@ function get_pubsub_endpoints() {
 }
 
 // write the content for our settings page that allows you to define your endpoints
-function add_settings_page() { ?>
+function pshb_add_settings_page() { ?>
     <div class="wrap">
     <h2>Define custom hubs</h2>
     
@@ -116,7 +113,7 @@ function add_settings_page() { ?>
     <?php
     
     // load the existing pubsub endpoint list from the wordpress options table
-    $pubsub_endpoints = trim(implode("\n",get_pubsub_endpoints()),"\n");
+    $pubsub_endpoints = trim(implode("\n",pshb_get_pubsub_endpoints()),"\n");
     
     ?>
 
@@ -153,38 +150,8 @@ function add_settings_page() { ?>
 
 <?php }
 
-
-// helper function to use the WP-friendly snoopy library 
-if (!function_exists('get_snoopy')) {
-	function get_snoopy() {
-		include_once(ABSPATH.'/wp-includes/class-snoopy.php');
-		return new Snoopy;
-	}
-}
-
-// over-ride the default curl http function to post to the hub endpoints
-function http_post_wp($url, $post_vars) {
-    
-    // turn the query string into an array for snoopy
-    parse_str($post_vars);
-    $post_vars = array();
-    $post_vars['hub.mode'] = $hub_mode;  // PHP converts the periods to underscores
-    $post_vars['hub.url'] = $hub_url;    
-    
-    // more universal than curl
-    $snoopy = get_snoopy();
-    $snoopy->agent = "(PubSubHubbub-Publisher-WP/1.0)";
-	$snoopy->submit($url,$post_vars);
-	$response = $snoopy->results;
-	// TODO: store the last_response.  requires a litle refactoring work.
-	$response_code = $snoopy->response_code;
-	if ($response_code == 204)
-	    return true;
-    return false;
-}
-
 // add a settings link next to deactive / edit
-function add_settings_link( $links, $file ) {
+function pshb_add_settings_link( $links, $file ) {
  	if( $file == 'pubsubhubbub/pubsubhubbub.php' && function_exists( "admin_url" ) ) {
 		$settings_link = '<a href="' . admin_url( 'options-general.php?page=pubsubhubbub/pubsubhubbub' ) . '">' . __('Settings') . '</a>';
 		array_unshift( $links, $settings_link ); // before other links
@@ -193,32 +160,32 @@ function add_settings_link( $links, $file ) {
 }
 
 // attach the handler that gets called every time you publish a post
-add_action('publish_post', 'publish_to_hub');
+add_action('publish_post', 'pshb_publish_to_hub');
 // add the link to our settings page in the WP menu structure
-add_action('admin_menu', 'add_plugin_menu');
+add_action('admin_menu', 'pshb_add_plugin_menu');
 
 // keep WPMU happy
-add_action('admin_init', 'register_my_settings');
-function register_my_settings() {
+add_action('admin_init', 'pshb_register_my_settings');
+function pshb_register_my_settings() {
     register_setting('my_settings_group','pubsub_endpoints');
 }
 
 // add the link tag that points to the hub in the header of our template...
 
 // to our atom feed
-add_action('atom_head', 'add_atom_link_tag');
+add_action('atom_head', 'pshb_add_atom_link_tag');
 // to our RSS 0.92 feed (requires a bit of a hack to include the ATOM namespace definition)
-add_action('do_feed_rss', 'start_rss_link_tag', 9); // run before output
-add_action('do_feed_rss', 'end_rss_link_tag', 11); // run after output
-add_action('rss_head', 'add_rss_link_tag');
+add_action('do_feed_rss', 'pshb_start_rss_link_tag', 9); // run before output
+add_action('do_feed_rss', 'pshb_end_rss_link_tag', 11); // run after output
+add_action('rss_head', 'pshb_add_rss_link_tag');
 // to our RDF / RSS 1 feed
-add_action('rdf_ns', 'add_rdf_ns_link');
-add_action('rdf_header', 'add_rss_link_tag');
+add_action('rdf_ns', 'pshb_add_rdf_ns_link');
+add_action('rdf_header', 'pshb_add_rss_link_tag');
 // to our RSS 2 feed
-add_action('rss2_head', 'add_rss_link_tag');
+add_action('rss2_head', 'pshb_add_rss_link_tag');
 // to our main HTML header -- not sure if we want to include this long-term or not.
-add_action('wp_head', 'add_atom_link_tag');
+add_action('wp_head', 'pshb_add_atom_link_tag');
 
-add_filter('plugin_action_links', 'add_settings_link', 10, 2);
+add_filter('plugin_action_links', 'pshb_add_settings_link', 10, 2);
 
 ?>
