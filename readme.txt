@@ -30,7 +30,7 @@ Please contact me if you operate a hub that you would like to be included as a d
 
 1. Upload the `pubsubhubbub` directory to your `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Select custom hubs under your PubSubHubbub Settings (optional)
+3. Select custom hubs under your 'PubSubHubbub Settings' (optional)
 
 Note: PHP 5.0 or better is required.
 
