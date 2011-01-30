@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: pubsubhubbub
 Requires at least: 2.5
 Tested up to: 3.0.4
-Stable tag: /trunk/
+Stable tag: 1.5
 
 A better way to tell the world when your blog is updated.
 
@@ -30,7 +30,7 @@ Please contact me if you operate a hub that you would like to be included as a d
 
 1. Upload the `pubsubhubbub` directory to your `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Select custom hubs under your 'PubSubHubbub Settings' (optional)
+3. Select custom hubs under your PubSubHubbub Settings (optional)
 
 Note: PHP 5.0 or better is required.
 
@@ -43,12 +43,17 @@ You can visit [PubSubHubbb on Google Code](http://code.google.com/p/pubsubhubbub
 = Where can I learn more about the author of this plugin? =
 
 You can learn more about [Josh Fraser](http://www.joshfraser.com "Josh Fraser") at [Online Aspect](http://www.onlineaspect.com "Online Aspect")
+and [Matthias Pfefferle](http://pfefferle.org "Matthias Pfefferle") at [Notizblog](http://notizblog.org/ "Notizblog")
 
 == Screenshots ==
 
 1. The PubSubHubbub Settings page allows you to define which hubs you want to use
 
 == Changelog ==
+
+= 1.5 =
+* Added filter to modify $feed_urls
+* Re-Added Stephen Paul Webers changes
 
 = 1.4 =
 * Added name spacing to avoid conflicts with other plugins & added patch from pfefferle

@@ -3,7 +3,7 @@
 Plugin Name: PubSubHubbub
 Plugin URI: http://code.google.com/p/pubsubhubbub/
 Description: A better way to tell the world when your blog is updated. 
-Version: 1.4
+Version: 1.5
 Author: Josh Fraser
 Author Email: josh@eventvue.com
 Author URI: http://www.joshfraser.com
@@ -11,15 +11,28 @@ Author URI: http://www.joshfraser.com
 
 include("publisher.php");
 
+/**
+ * beeing backwards compatible
+ * @deprecated
+ */
+function publish_to_hub($post_id, $feed_urls = null)  {
+  pshb_publish_to_hub($post_id, $feed_urls);
+}
+
 // function that is called whenever a new post is published
-function pshb_publish_to_hub($post_id)  {
-    
+// the ability for other plugins to hook into the PuSH code was added by Stephen Paul Weber (http://singpolyma.net)
+function pshb_publish_to_hub($post_id, $feed_urls = null)  {
+
     // we want to notify the hub for every feed
-    $feed_urls = array();
-    $feed_urls[] = get_bloginfo('atom_url');
-    $feed_urls[] = get_bloginfo('rss_url');
-    $feed_urls[] = get_bloginfo('rdf_url');
-    $feed_urls[] = get_bloginfo('rss2_url');
+    if (!$feed_urls) {
+        $feed_urls = array();
+        $feed_urls[] = get_bloginfo('atom_url');
+        $feed_urls[] = get_bloginfo('rss_url');
+        $feed_urls[] = get_bloginfo('rdf_url');
+        $feed_urls[] = get_bloginfo('rss2_url');
+        // customize default feeds
+        $feed_urls   = apply_filters('pshb_feed_urls', $feed_urls);
+    }
     // remove dups (ie. they all point to feedburner)
     $feed_urls = array_unique($feed_urls);
     // get the list of hubs
