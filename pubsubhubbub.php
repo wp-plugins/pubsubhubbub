@@ -2,7 +2,7 @@
 /*
 Plugin Name: PubSubHubbub
 Plugin URI: http://code.google.com/p/pubsubhubbub/
-Description: A better way to tell the world when your blog is updated. 
+Description: A better way to tell the world when your blog is updated.
 Version: 1.5
 Author: Josh Fraser
 Author Email: josh@eventvue.com
@@ -11,7 +11,6 @@ Author URI: http://www.joshfraser.com
 
 include("publisher.php");
 include("subscriber.php");
-include("discovery.php");
 
 /**
  * beeing backwards compatible
@@ -30,11 +29,11 @@ function pshb_publish_to_hub($feed_urls)  {
     $hub_urls = pshb_get_pubsub_endpoints();
     // loop through each hub
     foreach ($hub_urls as $hub_url) {
-        $p = new Publisher($hub_url);
+        $p = new PshbPublisher($hub_url);
         // publish the update to each hub
         if (!$p->publish_update($feed_urls)) {
             // TODO: add better error handling here
-        }    
+        }
     }
 }
 
@@ -48,9 +47,9 @@ function pshb_publish_post($post_id) {
     $feed_urls[] = get_bloginfo('rss2_url');
     // customize default feeds
     $feed_urls   = apply_filters('pshb_feed_urls', $feed_urls);
-    
+
     pshb_publish_to_hub($feed_urls);
-    
+
     return $post_id;
 }
 
@@ -62,20 +61,20 @@ function pshb_publish_comment($comment_id, $status) {
     $feed_urls[] = get_bloginfo('comments_rss2_url');
     // customize default feeds
     $feed_urls   = apply_filters('pshb_comment_feed_urls', $feed_urls);
-    
+
     pshb_publish_to_hub($feed_urls);
-    
+
     return $comment_id;
 }
 
-function pshb_add_atom_link_tag() {    
+function pshb_add_atom_link_tag() {
     $hub_urls = pshb_get_pubsub_endpoints();
     foreach ($hub_urls as $hub_url) {
         echo '<link rel="hub" href="'.$hub_url.'" />';
     }
 }
 
-function pshb_add_rss_link_tag() {    
+function pshb_add_rss_link_tag() {
     $hub_urls = pshb_get_pubsub_endpoints();
     foreach ($hub_urls as $hub_url) {
         echo '<atom:link rel="hub" href="'.$hub_url.'"/>';
@@ -88,13 +87,13 @@ function pshb_add_rdf_ns_link() {
 
 // hack to add the atom definition to the RSS feed
 // start capturing the feed output.  this is run at priority 9 (before output)
-function pshb_start_rss_link_tag() {    
+function pshb_start_rss_link_tag() {
     ob_start();
 }
 
 // this is run at priority 11 (after output)
 // add in the xmlns atom definition link
-function pshb_end_rss_link_tag() {    
+function pshb_end_rss_link_tag() {
     $feed = ob_get_clean();
     $pattern = '/<rss version="(.+)">/i';
     $replacement = '<rss version="$1" xmlns:atom="http://www.w3.org/2005/Atom">';
@@ -118,7 +117,7 @@ function pshb_get_pubsub_endpoints() {
         $hub_urls[] = "http://pubsubhubbub.appspot.com";
         $hub_urls[] = "http://superfeedr.com/hubbub";
     }
-    
+
     // clean out any blank values
     foreach ($hub_urls as $key => $value) {
         if (is_null($value) || $value=="") {
@@ -127,18 +126,18 @@ function pshb_get_pubsub_endpoints() {
             $hub_urls[$key] = trim($hub_urls[$key]);
         }
     }
-    
+
     return $hub_urls;
 }
 
 function pshb_subscribe_to_feed($feed_urls, $category = "default", $hub = null) {
     $d = new PshbDiscovery($feed);
-    
-    $s = new Subscriber($d->hub[0], "http://example.com");
+
+    $s = new PshbSubscriber($d->hub[0], "http://example.com");
     $status = $s->subscribe($d->self);
-    
+
     if ($status) {
-      
+
     }
 }
 
@@ -150,19 +149,19 @@ function pshb_callback_url() {
 function pshb_add_settings_page() { ?>
     <div class="wrap">
     <h2>Define custom hubs</h2>
-    
+
     <form method="post" action="options.php">
     <?php //wp_nonce_field('update-options'); ?>
     <!-- starting -->
     <?php settings_fields('my_settings_group'); ?>
     <?php do_settings_sections('my_settings_section'); ?>
     <!-- ending -->
-    
+
     <?php
-    
+
     // load the existing pubsub endpoint list from the wordpress options table
     $pubsub_endpoints = trim(implode("\n",pshb_get_pubsub_endpoints()),"\n");
-    
+
     ?>
 
     <table class="form-table">
@@ -182,7 +181,7 @@ function pshb_add_settings_page() { ?>
     </p>
 
     </form>
-    
+
     <br /><br />
     <div style='background-color:#FFFEEB;border:1px solid #CCCCCC;padding:12px'>
         <strong>Thanks for using PubSubHubbub!</strong><br />
@@ -193,7 +192,7 @@ function pshb_add_settings_page() { ?>
             <li><a href='http://code.google.com/p/pubsubhubbub/'>Learn more about the PubSubHubbub protocol</a></li>
         </ul>
     </div>
-    
+
     </div>
 
 <?php }
