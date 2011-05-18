@@ -130,21 +130,6 @@ function pshb_get_pubsub_endpoints() {
     return $hub_urls;
 }
 
-function pshb_subscribe_to_feed($feed_urls, $category = "default", $hub = null) {
-    $d = new PshbDiscovery($feed);
-
-    $s = new PshbSubscriber($d->hub[0], "http://example.com");
-    $status = $s->subscribe($d->self);
-
-    if ($status) {
-
-    }
-}
-
-function pshb_callback_url() {
-
-}
-
 // write the content for our settings page that allows you to define your endpoints
 function pshb_add_settings_page() { ?>
     <div class="wrap">
@@ -209,7 +194,7 @@ function pshb_add_settings_link( $links, $file ) {
 // attach the handler that gets called every time you publish a post
 add_action('publish_post', 'pshb_publish_post');
 // attach the handler that gets called every time you get a comment
-add_action('comment_post', 'pshb_publish_post');
+add_action('comment_post', 'pshb_publish_comment');
 // add the link to our settings page in the WP menu structure
 add_action('admin_menu', 'pshb_add_plugin_menu');
 
