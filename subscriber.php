@@ -17,7 +17,7 @@ class PshbSubscriber {
   protected $google_key = "";
 
   protected $hub_url;
-  protected $self_url;
+  protected $topic_url;
   protected $callback_url;
   protected $credentials;
   // accepted values are "async" and "sync"
@@ -26,12 +26,8 @@ class PshbSubscriber {
   protected $lease_seconds;
 
   // create a new Subscriber (credentials added for SuperFeedr support)
-  public function __construct($hub_url, $callback_url, $credentials = false) {
-
-    if (!isset($hub_url))
-      throw new Exception('Please specify a hub url');
-
-    if (!preg_match("|^https?://|i",$hub_url))
+  public function __construct($callback_url, $hub_url = null, $credentials = false) {
+    if ($hub_url && !preg_match("|^https?://|i",$hub_url))
       throw new Exception('The specified hub url does not appear to be valid: '.$hub_url);
 
     if (!isset($callback_url))
@@ -58,6 +54,10 @@ class PshbSubscriber {
   }
 
   public function subscribe($topic_url, $http_function = false) {
+    if (!$this->hub_url) {
+      $this->find_hub($topic_url);
+    }
+
     return $this->change_subscription("subscribe", $topic_url, $http_function = false);
   }
 
@@ -93,12 +93,13 @@ class PshbSubscriber {
   }
 
   // default http function that uses curl to post to the hub endpoint
-  private function http($url, $post_string) {
+  private function http($url, $post_string = null) {
 
     // add any additional curl options here
     $options = array(CURLOPT_URL => $url,
                      CURLOPT_USERAGENT => "PubSubHubbub-Subscriber-PHP/1.0",
-                     CURLOPT_RETURNTRANSFER => true);
+                     CURLOPT_RETURNTRANSFER => true,
+                     CURLOPT_FOLLOWLOCATION => true);
 
     if ($post_string) {
       $options[CURLOPT_POST] = true;
@@ -123,9 +124,9 @@ class PshbSubscriber {
   }
 
   //
-  public function find_hub($url) {
-    $xml = $this->http($url);
-    if ($xml)
+  public function find_hub($topic_url) {
+    $xml = $this->http($topic_url);
+    if (!$xml)
       throw new Exception('Please enter a valid URL');
 
     $xml_parser = xml_parser_create('');
@@ -154,8 +155,12 @@ class PshbSubscriber {
       }
     }
 
-    $this->hub_url = $hubs[0];
-    $this->self = $self;
+    if (count($hubs) >= 1)
+      $this->hub_url = $hubs[0];
+    else
+      throw new Exception('This feed doesn\'t reference a hub url');
+
+    $this->topic_url = $self;
   }
 }
 ?>
