@@ -200,5 +200,4 @@ add_action('rss2_head', 'pshb_add_rss_link_tag');
 add_action('wp_head', 'pshb_add_atom_link_tag');
 
 add_filter('plugin_action_links', 'pshb_add_settings_link', 10, 2);
-
 ?>
