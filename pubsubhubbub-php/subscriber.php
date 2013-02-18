@@ -17,7 +17,7 @@ class PshbSubscriber {
   protected $callback_url;
   protected $credentials;
   // accepted values are "async" and "sync"
-  protected $verify = "sync";
+  protected $verify = "async";
   protected $verify_token;
   protected $lease_seconds;
 
@@ -104,7 +104,7 @@ class PshbSubscriber {
     return false;
   }
 
-  //
+  // discover the hub url
   public function find_hub($topic_url) {
     $self = $topic_url;
     $xml = $this->http($topic_url);
@@ -145,6 +145,7 @@ class PshbSubscriber {
     $this->topic_url = $self;
   }
   
+  // getter
   public function get_topic_url() {
     return $this->topic_url;
   }
