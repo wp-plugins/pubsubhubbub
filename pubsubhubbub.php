@@ -5,7 +5,7 @@ Plugin URI: http://code.google.com/p/pubsubhubbub/
 Description: A better way to tell the world when your blog is updated. 
 Version: 1.5
 Author: Josh Fraser
-Author Email: josh@eventvue.com
+Author Email: joshfraz@gmail.com
 Author URI: http://www.joshfraser.com
 */
 
@@ -96,7 +96,7 @@ function pshb_get_pubsub_endpoints() {
     // if no values have been set, revert to the defaults (pubsubhubbub on app engine & superfeedr)
     if (!$endpoints) {
         $hub_urls[] = "http://pubsubhubbub.appspot.com";
-        $hub_urls[] = "http://superfeedr.com/hubbub";
+        $hub_urls[] = "http://pubsubhubbub.superfeedr.com";
     }
     
     // clean out any blank values
