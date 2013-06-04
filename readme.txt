@@ -14,6 +14,7 @@ This [PubSubHubbub](http://code.google.com/p/pubsubhubbub/ "PubSubHubbub") plugi
 This plugin:
 
 * Sends realtime notifications when you update your blog
+* Supports multi-user installations (Wordpress MU)
 * Supports multiple hubs
 * Supports all of the feed formats used by WordPress, not just ATOM and RSS2
 * Announces which hubs you are using by adding `<link rel="hub" ...>` declarations to your template header and ATOM feed
