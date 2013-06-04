@@ -3,17 +3,18 @@ Contributors: joshfraz, pfefferle
 Tags: pubsubhubbub
 Requires at least: 2.5
 Tested up to: 3.5.1
-Stable tag: 1.6.2
+Stable tag: 1.6.3
 
 A better way to tell the world when your blog is updated.
 
 == Description ==
 
-This [PubSubHubbub](http://code.google.com/p/pubsubhubbub/ "PubSubHubbub") plugin is a simple way to let people know in real-time when your blog is updated.  PubSubHubbub is quickly gaining adoption and is already being used by Google Reader, Google Alerts, FriendFeed and more.
+This [PubSubHubbub](http://code.google.com/p/pubsubhubbub/ "PubSubHubbub") plugin is a simple way to let people know in real-time when your blog is updated.  PubSubHubbub is widely adopted and is used by Google Reader, Google Alerts and many other services.
 
 This plugin:
 
-* Now supports multiple hubs!
+* Sends realtime notifications when you update your blog
+* Supports multiple hubs
 * Supports all of the feed formats used by WordPress, not just ATOM and RSS2
 * Announces which hubs you are using by adding `<link rel="hub" ...>` declarations to your template header and ATOM feed
 * Adds `<atom:link rel="hub" ...>` to your RSS feeds along with the necessary XMLNS declaration for RSS 0.92/1.0
@@ -47,6 +48,10 @@ and [Matthias Pfefferle](http://pfefferle.org "Matthias Pfefferle") at [Notizblo
 1. The PubSubHubbub Settings page allows you to define which hubs you want to use
 
 == Changelog ==
+
+= 1.6.3 =
+* Update hub URL for SuperFeedr (now pubsubhubbub.superfeedr.com)
+* Update credits and documentation
 
 = 1.6.1 =
 * Bug fixes
