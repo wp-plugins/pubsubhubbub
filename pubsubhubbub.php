@@ -5,7 +5,7 @@ Plugin URI: http://code.google.com/p/pubsubhubbub/
 Description: A better way to tell the world when your blog is updated.  Set a custom hub on the <a href="./options-general.php?page=pubsubhubbub/pubsubhubbub">PubSubHubbub settings page</a> 
 Version: 1.1
 Author: Josh Fraser
-Author Email: josh@eventvue.com
+Author Email: joshfraz@gmail.com
 Author URI: http://www.joshfraser.com
 */
 

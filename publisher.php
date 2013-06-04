@@ -2,7 +2,7 @@
 
 // a PHP client library for pubsubhubbub
 // as defined at http://code.google.com/p/pubsubhubbub/
-// written by Josh Fraser | joshfraser.com | josh@eventvue.com
+// written by Josh Fraser | joshfraser.com | joshfraz@gmail.com
 // Released under Apache License 2.0
 
 class Publisher {
