@@ -3,7 +3,7 @@
 Plugin Name: PubSubHubbub
 Plugin URI: http://code.google.com/p/pubsubhubbub/
 Description: A better way to tell the world when your blog is updated.
-Version: 1.6.4
+Version: 1.6.5
 Author: Josh Fraser, Matthias Pfefferle
 Author Email: joshfraz@gmail.com
 Author URI: http://wordpress.org/extend/plugins/pubsubhubbub/
@@ -199,7 +199,7 @@ function pshb_add_settings_page() { ?>
 // add a settings link next to deactive / edit
 function pshb_add_settings_link( $links, $file ) {
   if( $file == 'pubsubhubbub/pubsubhubbub.php' && function_exists( "admin_url" ) ) {
-    $settings_link = '<a href="' . admin_url( 'options-general.php?page=pubsubhubbub/pubsubhubbub' ) . '">' . __('Settings') . '</a>';
+    $settings_link = '<a href="' . admin_url( 'options-general.php?page=pubsubhubbub' ) . '">' . __('Settings') . '</a>';
     array_unshift( $links, $settings_link ); // before other links
   }
   return $links;
