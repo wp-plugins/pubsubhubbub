@@ -3,14 +3,13 @@
 Plugin Name: PubSubHubbub
 Plugin URI: http://code.google.com/p/pubsubhubbub/
 Description: A better way to tell the world when your blog is updated.
-Version: 1.6.3
+Version: 1.6.5
 Author: Josh Fraser, Matthias Pfefferle
 Author Email: joshfraz@gmail.com
 Author URI: http://wordpress.org/extend/plugins/pubsubhubbub/
 */
 
-include("pubsubhubbub-php/publisher.php");
-include("pubsubhubbub-php/subscriber.php");
+include("publisher.php");
 
 // the ability for other plugins to hook into the PuSH code based on a
 // fix by Stephen Paul Weber (http://singpolyma.net)
@@ -29,58 +28,10 @@ function pshb_publish_to_hub($feed_urls)  {
   }
 }
 
-// subscribe to a feed
-// NOTE! THIS IS BETA STATE
-function pshb_subscribe($url) {
-  try {
-    $s = new PshbSubscriber(site_url("/?pubsubhubbub=endpoint"));
-    $s->find_hub($url);
-
-    $subscriptions = get_option('pubsub_subscribe');
-    $subscriptions[] = $s->get_topic_url();
-    update_option('pubsub_subscribe', array_unique($subscriptions));
-
-    if ($s->subscribe($s->get_topic_url()) !== false) {
-      return true;
-    }
-  } catch (Exception $e) {
-    return $e->getMessage();
-  }
-
-  return false;
-}
-
-// unsubscribe from a feed
-// NOTE! THIS IS BETA STATE
-function pshb_unsubscribe($url) {
-  try {
-    $s = new PshbSubscriber(site_url("/?pubsubhubbub=endpoint"));
-    $s->find_hub($url);
-
-    $to_unsubscribe = get_option('pubsub_unsubscribe');
-    $to_unsubscribe[] = $s->get_topic_url();
-    update_option('pubsub_unsubscribe', array_unique($to_unsubscribe));
-
-    if ($s->unsubscribe($s->get_topic_url()) !== false) {
-      return true;
-    }
-  } catch (Exception $e) {
-    return $e->getMessage();
-  }
-
-  return false;
-}
-
 // function that is called whenever a new post is published
 function pshb_publish_post($post_id) {
-  // we want to notify the hub for every feed
-  $feed_urls = array();
-  $feed_urls[] = get_bloginfo('atom_url');
-  $feed_urls[] = get_bloginfo('rss_url');
-  $feed_urls[] = get_bloginfo('rdf_url');
-  $feed_urls[] = get_bloginfo('rss2_url');
   // customize default feeds
-  $feed_urls   = apply_filters('pshb_feed_urls', $feed_urls);
+  $feed_urls   = pshb_get_feed_urls();
 
   pshb_publish_to_hub($feed_urls);
 
@@ -90,12 +41,8 @@ add_action('publish_post', 'pshb_publish_post');
 
 // function that is called whenever a new comment is published
 function pshb_publish_comment($comment_id) {
-  // we want to notify the hub for every feed
-  $feed_urls = array();
-  $feed_urls[] = get_bloginfo('comments_atom_url');
-  $feed_urls[] = get_bloginfo('comments_rss2_url');
   // customize default feeds
-  $feed_urls   = apply_filters('pshb_comment_feed_urls', $feed_urls);
+  $feed_urls   = pshb_get_comment_feed_urls();
 
   pshb_publish_to_hub($feed_urls);
 
@@ -130,7 +77,6 @@ function pshb_add_rdf_ns_link() {
 }
 add_action('rdf_ns', 'pshb_add_rdf_ns_link');
 
-
 // hack to add the atom definition to the RSS feed
 // start capturing the feed output.  this is run at priority 9 (before output)
 function pshb_start_rss_link_tag() {
@@ -151,7 +97,7 @@ add_action('do_feed_rss', 'pshb_end_rss_link_tag', 11); // run after output
 
 // add a link to our settings page in the WP menu
 function pshb_add_plugin_menu() {
-  add_options_page('PubSubHubbub Settings', 'PubSubHubbub', 'administrator', __FILE__, 'pshb_add_settings_page');
+  add_options_page('PubSubHubbub Settings', 'PubSubHubbub', 'administrator', 'pubsubhubbub', 'pshb_add_settings_page');
 }
 add_action('admin_menu', 'pshb_add_plugin_menu');
 
@@ -177,6 +123,28 @@ function pshb_get_pubsub_endpoints() {
   }
 
   return $hub_urls;
+}
+
+// helper function to get feed urls
+function pshb_get_feed_urls() {
+  // we want to notify the hub for every feed
+  $feed_urls = array();
+  $feed_urls[] = get_bloginfo('atom_url');
+  $feed_urls[] = get_bloginfo('rss_url');
+  $feed_urls[] = get_bloginfo('rdf_url');
+  $feed_urls[] = get_bloginfo('rss2_url');
+
+  return apply_filters('pshb_feed_urls', $feed_urls);
+}
+
+// helper function to get comment-feed urls
+function pshb_get_comment_feed_urls() {
+  // we want to notify the hub for every feed
+  $feed_urls = array();
+  $feed_urls[] = get_bloginfo('comments_atom_url');
+  $feed_urls[] = get_bloginfo('comments_rss2_url');
+
+  return apply_filters('pshb_comment_feed_urls', $feed_urls);
 }
 
 // write the content for our settings page that allows you to define your endpoints
@@ -231,7 +199,7 @@ function pshb_add_settings_page() { ?>
 // add a settings link next to deactive / edit
 function pshb_add_settings_link( $links, $file ) {
   if( $file == 'pubsubhubbub/pubsubhubbub.php' && function_exists( "admin_url" ) ) {
-    $settings_link = '<a href="' . admin_url( 'options-general.php?page=pubsubhubbub/pubsubhubbub' ) . '">' . __('Settings') . '</a>';
+    $settings_link = '<a href="' . admin_url( 'options-general.php?page=pubsubhubbub' ) . '">' . __('Settings') . '</a>';
     array_unshift( $links, $settings_link ); // before other links
   }
   return $links;
@@ -249,57 +217,23 @@ function pshb_query_var($vars) {
 }
 add_filter('query_vars', 'pshb_query_var');
 
-// parses the request
-function pshb_parse_request() {
-  global $wp_query, $wp;
-  $query_vars = $wp->query_vars;
-
-  // handle (un)subscribe requests
-  if (array_key_exists('hub_mode', $query_vars)
-      && in_array($query_vars['hub_mode'], array("subscribe", "unsubscribe"))
-      && isset($query_vars['hub_challenge'])) {
-    $list = get_option('pubsub_'.$query_vars['hub_mode']);
-    if (is_array($list) && in_array($query_vars['hub_topic'], $list)) {
-      // remove urls from option lists when unsubscribing
-      if ($query_vars['hub_mode'] == "unsubscribe") {
-        pshb_remove_from_option($query_vars['hub_topic'], "unsubscribe");
-        pshb_remove_from_option($query_vars['hub_topic'], "subscribe");
-      }
-      echo $query_vars['hub_challenge'];
-      exit;
-    }
-  // handle pushes
-  } elseif (array_key_exists('pubsubhubbub', $query_vars)
-            && $query_vars['pubsubhubbub'] == "endpoint"
-            && $request_body = @file_get_contents('php://input')) {
-    do_action('pshb_push', $request_body);
-    exit;
-  }
-}
-add_action('parse_request', 'pshb_parse_request');
-
-// remove something from the option list
-function pshb_remove_from_option($url, $option) {
-  if (!in_array($option, array("subscribe", "unsubscribe"))) {
-    return false;
-  }
-
-  $list = get_option('pubsub_'.$option);
-  $key = array_search($url, $list);
-  unset($list[$key]);
-  update_option('pubsub_'.$option, $list);
-}
-
 // adds link headers as defined in the curren v0.4 draft
 // https://github.com/pubsubhubbub/PubSubHubbub/issues/2
 function pshb_template_redirect() {
-  if ((is_comment_feed() && !is_singular())
-      || (is_feed() && !is_comment_feed() && !is_archive())) {
+  global $wp;
+
+  $feed_urls = pshb_get_feed_urls();
+  $comment_feed_urls = pshb_get_comment_feed_urls();
+  
+  $urls = array_unique(array_merge($feed_urls, $comment_feed_urls));
+  $current_url = ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+  
+  if (in_array($current_url, $urls)) {
     $hub_urls = pshb_get_pubsub_endpoints();
     foreach ($hub_urls as $hub_url) {
-      header('Link: <'.$hub_url.'>; rel=hub', false);
+      header('Link: <'.$hub_url.'>; rel="hub"', false);
     }
-    header('Link: <'.( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'].'>; rel=self', false);
+    header('Link: <'.$current_url.'>; rel="self"', false);
   }
 }
 add_action('template_redirect', 'pshb_template_redirect');
