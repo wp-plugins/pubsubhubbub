@@ -1,7 +1,7 @@
 <?php
 // a PHP client library for pubsubhubbub
 // as defined at http://code.google.com/p/pubsubhubbub/
-// written by Josh Fraser | joshfraser.com | joshfraz@gmail.com
+// written by Josh Fraser | joshfraser.com | josh@eventvue.com
 // modified by Matthias Pfefferle | notizblog.org | matthias@pfefferle.org
 // Released under Apache License 2.0
 
