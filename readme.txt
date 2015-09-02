@@ -1,15 +1,15 @@
-=== Plugin Name ===
+=== PubSubHubbub ===
 Contributors: joshfraz, pfefferle
-Tags: pubsubhubbub
+Tags: pubsubhubbub, webhooks, pubsub
 Requires at least: 2.5
-Tested up to: 3.6.1
-Stable tag: 1.6.5
+Tested up to: 3.7.1
+Stable tag: 1.7.0
 
 A better way to tell the world when your blog is updated.
 
 == Description ==
 
-This [PubSubHubbub](http://code.google.com/p/pubsubhubbub/ "PubSubHubbub") plugin is a simple way to let people know in real-time when your blog is updated.  PubSubHubbub is widely adopted and is used by Google Reader, Google Alerts and many other services.
+This [PubSubHubbub](https://github.com/pubsubhubbub/ "PubSubHubbub") plugin is a simple way to let people know in real-time when your blog is updated.  PubSubHubbub is widely adopted and is used by Google Reader, Google Alerts and many other services.
 
 This plugin:
 
@@ -17,7 +17,7 @@ This plugin:
 * Supports multi-user installations (Wordpress MU)
 * Supports multiple hubs
 * Supports all of the feed formats used by WordPress, not just ATOM and RSS2
-* Supports latest spec ([Version 0.4](https://pubsubhubbub.googlecode.com/git/pubsubhubbub-core-0.4.html))
+* Supports latest spec ([Version 0.4](http://pubsubhubbub.github.io/PubSubHubbub/pubsubhubbub-core-0.4.html))
 * Announces which hubs you are using by adding `<link rel="hub" ...>` declarations to your template header and ATOM feed
 * Adds `<atom:link rel="hub" ...>` to your RSS feeds along with the necessary XMLNS declaration for RSS 0.92/1.0
 
@@ -38,7 +38,7 @@ Please contact me if you operate a hub that you would like to be included as a d
 
 = Where can I learn more about the PubSubHubbub protocol? =
 
-You can visit [PubSubHubbb on Google Code](http://code.google.com/p/pubsubhubbub/ "PubSubHubbb on Google Code")
+You can visit [PubSubHubbub on Github](https://github.com/pubsubhubbub/ "PubSubHubbub on Github")
 
 = Where can I learn more about the authors of this plugin? =
 
@@ -50,6 +50,11 @@ and [Matthias Pfefferle](http://pfefferle.org "Matthias Pfefferle") at [Notizblo
 1. The PubSubHubbub Settings page allows you to define which hubs you want to use
 
 == Changelog ==
+
+= 1.7.0 =
+* fixed "plugin name"
+* nicer docs
+* WordPress coding standard
 
 = 1.6.5 =
 * hotfix
@@ -67,7 +72,7 @@ and [Matthias Pfefferle](http://pfefferle.org "Matthias Pfefferle") at [Notizblo
 * Bug fixes
 
 = 1.6 =
-* Added comment-feed support 
+* Added comment-feed support
 * Added simple subscriber functions
 * Added link header
 
